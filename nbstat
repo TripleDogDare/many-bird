@@ -1,0 +1,40 @@
+#!/bin/bash
+set -euo pipefail
+
+# Find all netbird sockets
+SOCKETS=($(find /run -maxdepth 1 -name 'netbird*.sock' 2>/dev/null))
+
+if [ ${#SOCKETS[@]} -eq 0 ]; then
+    echo "No NetBird sockets found in /run"
+    exit 1
+fi
+
+# Process each socket
+for SOCK in "${SOCKETS[@]}"; do
+    echo "=== Status for socket: $SOCK ==="
+    
+    # Check if socket is accessible
+    if ! test -S "$SOCK"; then
+        echo "ERROR: Socket $SOCK is not accessible or not a socket"
+        echo
+        continue
+    fi
+    
+    # Try to get status from this socket
+    if ! netbird status --daemon-addr "unix://$SOCK" --json >/dev/null 2>&1; then
+        echo "ERROR: Cannot connect to NetBird daemon via $SOCK"
+        echo
+        continue
+    fi
+    
+    # Get and format the status
+    (
+        printf "FQDN\tNetBird IP\tStatus\tRelay\tLast Seen\n"
+        netbird status --daemon-addr "unix://$SOCK" --json | jq -r '
+                .peers.details[]? |
+                [.fqdn, .netbirdIp, .status, .relayAddress, .lastStatusUpdate] |
+                @tsv'
+    ) | column -s $'\t' -t
+    
+    echo
+done

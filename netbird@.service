@@ -1,0 +1,19 @@
+[Unit]
+Description=A WireGuard-based mesh network that connects your devices into a single private network (%i)
+ConditionFileIsExecutable=/usr/bin/netbird
+After=network.target syslog.target
+
+[Service]
+StartLimitInterval=5
+StartLimitBurst=10
+ExecStart=/usr/bin/netbird "service" "run" "--config" "/etc/netbird/config.d/%i.json" "--log-level" "info" "--daemon-addr" "unix:///var/run/netbird-%i.sock" "--log-file" "/var/log/netbird/client-%i.log"
+
+StandardOutput=file:/var/log/netbird/netbird-%i.out
+StandardError=file:/var/log/netbird/netbird-%i.err
+
+Restart=always
+RestartSec=120
+EnvironmentFile=-/etc/sysconfig/netbird-%i
+
+[Install]
+WantedBy=multi-user.target
