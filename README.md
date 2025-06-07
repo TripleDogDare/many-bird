@@ -1,5 +1,5 @@
 # many-bird
-Configuration instructions for multiple netbird instances on linux
+Configuration instructions for multiple [netbird](https://github.com/netbirdio/netbird) instances on linux
 
 # More netbird configs!
 I add more netbird configs to a `config.d` directory.
