@@ -1,4 +1,4 @@
-# multibird
+# many-bird
 Configuration instructions for multiple netbird instances on linux
 
 # More netbird configs!
